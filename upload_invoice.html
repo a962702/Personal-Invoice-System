@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-tw">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>上傳發票 | 統一發票管理平台</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css"
+		integrity="sha512-usVBAd66/NpVNfBge19gws2j6JZinnca12rAe2l+d+QkLU9fiG02O1X8Q6hepIpr/EYKZvKx/I9WsnujJuOmBA=="
+		crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/js/bootstrap.bundle.min.js"
+		integrity="sha512-72WD92hLs7T5FAXn3vkNZflWG6pglUDDpm87TeQmfSg8KnrymL2G30R7as4FmTwhgu9H7eSzDCX3mjitSecKnw=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body style="text-align: center;">
+	<nav class="navbar navbar-light bg-light">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="/">統一發票管理平台</a>
+		</div>
+	</nav>
+	<hr />
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/">Home</a></li>
+			<li class="breadcrumb-item active" aria-current="page">發票上傳</li>
+		</ol>
+	</nav>
+	<div class="container-sm">
+		<form id="upload_form" method="POST" action="upload.php" enctype="multipart/form-data">
+			<div class="input-group mb-3">
+				<span class="input-group-text">期別</span>
+				<input type="month" class="form-control" name="invPeriod" id="invPeriod" required>
+			</div>
+			<p>發票期別以「偶數月」為代表，如1、2月發票請選擇「2月」</p>
+			<div class="mb-3">
+				<input type="file" class="form-control" name="uploadfile" id="uploadfile" required>
+			</div>
+		</form>
+		<button type="button" class="btn btn-primary" onclick="upload_check(); checkModal.show();">上傳</button>
+	</div>
+	<div class="modal fade" id="checkModal" aria-hidden="true" aria-labelledby="checkModalLabel" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="checkModalLabel">確認上傳</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body" id="checkModalBody">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+					<button class="btn btn-primary" data-bs-target="#uploadModal" data-bs-toggle="modal"
+						data-bs-dismiss="modal" onclick="document.getElementById('upload_form').submit();">確定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var checkModal = new bootstrap.Modal(document.getElementById('checkModal'));
+		upload_check = function(){
+			document.getElementById('checkModalBody').innerHTML = "發票期別：" + document.getElementById('invPeriod').value + "<br/>";
+			document.getElementById('checkModalBody').innerHTML += "檔案名稱：" + document.getElementById('uploadfile').value;
+		}
+	</script>
+	<div class="modal fade" id="uploadModal" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true"
+		aria-labelledby="uploadModalLabel" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="uploadModalLabel">上傳中</h5>
+				</div>
+				<div class="modal-body" id="uploadModalBody">
+					<div class="progress">
+						<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+							aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%"></div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary visually-hidden" data-bs-dismiss="modal">完成</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

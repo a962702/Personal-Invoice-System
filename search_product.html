@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-tw">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>商品查詢 | 統一發票管理平台</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css"
+		integrity="sha512-usVBAd66/NpVNfBge19gws2j6JZinnca12rAe2l+d+QkLU9fiG02O1X8Q6hepIpr/EYKZvKx/I9WsnujJuOmBA=="
+		crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/js/bootstrap.bundle.min.js"
+		integrity="sha512-72WD92hLs7T5FAXn3vkNZflWG6pglUDDpm87TeQmfSg8KnrymL2G30R7as4FmTwhgu9H7eSzDCX3mjitSecKnw=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+		integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body style="text-align: center;">
+	<nav class="navbar navbar-light bg-light">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="/">統一發票管理平台</a>
+		</div>
+	</nav>
+	<hr />
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/">Home</a></li>
+			<li class="breadcrumb-item active" aria-current="page">商品查詢</li>
+		</ol>
+	</nav>
+	<div class="container-sm">
+		<div class="accordion" id="searchAccordion">
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="searchAccordionHeader">
+					<button class="accordion-button" type="button" data-bs-toggle="collapse"
+						data-bs-target="#searchAccordionBody" aria-expanded="true" aria-controls="searchAccordionBody">
+						設定搜尋條件
+					</button>
+				</h2>
+				<div id="searchAccordionBody" class="accordion-collapse collapse show"
+					aria-labelledby="searchAccordionHeader" data-bs-parent="#searchAccordion">
+					<div class="accordion-body">
+						<form>
+							<div class="input-group mb-3">
+								<span class="input-group-text">商品名稱</span>
+								<input type="text" class="form-control" name="productName" id="productName">
+							</div>
+						</form>
+						<button class="btn btn-primary" id="searchbtn">查詢</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		$('form input').keydown(function (e) {
+			if (e.keyCode == 13) {
+				e.preventDefault();
+				document.getElementById('searchbtn').click();
+				return false;
+			}
+		});
+		function get_invoice(invNum) {
+			document.getElementById("invoice_detail_table").innerHTML = "";
+			let BodyText = "";
+			BodyText += "<div class='spinner-border' role='status'>";
+			BodyText += "<span class='visually-hidden'>Loading...</span>";
+			BodyText += "</div>";
+			BodyText += "<p class='fs-3'>載入中...</p>";
+			document.getElementById("invoice_detail_body").innerHTML = BodyText;
+			myModal.show();
+			$.ajax({
+				method: "GET",
+				url: "get_invoice_detail.php",
+				dataType: "json",
+				data: {
+					invNum: invNum
+				}
+			})
+				.done(function (data) {
+					let text = "";
+					for (let x in data) {
+						text += "<tr>";
+						text += "<td>" + data[x].description + "</td>";
+						text += "<td>" + data[x].amount + "</td>";
+						text += "</tr>";
+					}
+					document.getElementById("invoice_detail_table").innerHTML = text;
+					let BodyText = "";
+					BodyText += "<p class='fs-4'>";
+					BodyText += "發票號碼:" + invNum;
+					BodyText += "</p>";
+					document.getElementById("invoice_detail_body").innerHTML = BodyText;
+				})
+		}
+		function get_product(description) {
+			document.getElementById("product_detail_table").innerHTML = "";
+			let BodyText = "";
+			BodyText += "<div class='spinner-border' role='status'>";
+			BodyText += "<span class='visually-hidden'>Loading...</span>";
+			BodyText += "</div>";
+			BodyText += "<p class='fs-3'>載入中...</p>";
+			document.getElementById("product_detail_body").innerHTML = BodyText;
+			myModal2.show();
+			$.ajax({
+				method: "GET",
+				url: "search_product.php",
+				dataType: "json",
+				data: {
+					description: description
+				}
+			})
+				.done(function (data) {
+					let text = "";
+					for (let x in data) {
+						text += "<tr>";
+						text += "<td>" + data[x].invDate + "</td>";
+						text += "<td>" + data[x].sellerName + "</td>";
+						text += "<td>" + data[x].amount + "</td>";
+						text += "</tr>";
+					}
+					document.getElementById("product_detail_table").innerHTML = text;
+					let BodyText = "";
+					BodyText += "<p class='fs-4'>";
+					BodyText += "查詢商品:" + description;
+					BodyText += "</p>";
+					document.getElementById("product_detail_body").innerHTML = BodyText;
+				})
+		}
+		document.getElementById('searchbtn').onclick = function () {
+			$.ajax({
+				method: "GET",
+				url: "search_product.php",
+				dataType: "json",
+				data: {
+					productName: document.querySelector('#productName').value
+				}
+			})
+				.done(function (data) {
+					let TableText = "";
+					if (data.length == 0) TableText = "<tr><td colspan='4' class='align-middle' style='text-align: center'>無資料</td></tr>";
+					else {
+						for (let x in data) {
+							TableText += "<tr>";
+							TableText += "<td>" + data[x].invPeriod + "</td>";
+							TableText += "<td><a href='#' onclick='get_invoice(\"" + data[x].invNum + "\");'>" + data[x].invNum + "</a></td>";
+							TableText += "<td><a href='#' onclick='get_product(\"" + data[x].description + "\"); myModal2.show();'>" + data[x].description + "</a></td>";
+							TableText += "<td>" + data[x].amount + "</td>";
+							TableText += "</tr>";
+						}
+					}
+					document.getElementById("TableBody").innerHTML = TableText;
+				})
+		}
+	</script>
+	<div class="table-responsive">
+		<table class="table table-striped">
+			<thead>
+				<th scope="col">發票期別</th>
+				<th scope="col">發票號碼</th>
+				<th scope="col">商品名稱</th>
+				<th scope="col">金額</th>
+			</thead>
+			<tbody id="TableBody">
+			</tbody>
+		</table>
+		<!--
+		<nav aria-label="Page navigation">
+			<ul class="pagination justify-content-center">
+				<li class="page-item">
+					<a class="page-link" href="#" aria-label="Previous">
+						<span aria-hidden="true">&laquo;</span>
+					</a>
+				</li>
+				<li class="page-item"><a class="page-link" href="#">1</a></li>
+				<li class="page-item"><a class="page-link" href="#">2</a></li>
+				<li class="page-item"><a class="page-link" href="#">3</a></li>
+				<li class="page-item">
+					<a class="page-link" href="#" aria-label="Next">
+						<span aria-hidden="true">&raquo;</span>
+					</a>
+				</li>
+			</ul>
+		</nav>
+		-->
+	</div>
+	<div class="modal fade" id="invoice_detail" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="ModalLabel">發票明細</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div id="invoice_detail_body">
+					</div>
+					<table class="table table-striped">
+						<thead>
+							<th scope="col">商品名稱</th>
+							<th scope="col">金額</th>
+						</thead>
+						<tbody id="invoice_detail_table">
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var myModal = new bootstrap.Modal(document.getElementById('invoice_detail'));
+	</script>
+	<div class="modal fade" id="product_history" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="ModalLabel">商品價格歷史</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div id="product_detail_body">
+					</div>
+					<table class="table table-striped">
+						<thead>
+							<th scope="col">發票日期</th>
+							<th scope="col">商店名稱</th>
+							<th scope="col">金額</th>
+						</thead>
+						<tbody id="product_detail_table">
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var myModal2 = new bootstrap.Modal(document.getElementById('product_history'));
+	</script>
+</body>
+
+</html>
